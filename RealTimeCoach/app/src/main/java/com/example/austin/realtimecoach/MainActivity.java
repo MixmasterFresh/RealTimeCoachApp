@@ -4,16 +4,42 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+
 
 
 public class MainActivity extends Activity {
+    /* Get Default Adapter */
+    private BluetoothAdapter  _bluetooth = BluetoothAdapter.getDefaultAdapter();
+
+    /* request BT enable */
+    private static final int  REQUEST_ENABLE      = 0x1;
+    /* request BT discover */
+    private static final int  REQUEST_DISCOVERABLE  = 0x2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Button open_BT = (Button) findViewById(R.id.action_add_BT);
     }
 
+    public void onEnableButtonClicked()
+    {
+        //Intent enabler = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        //startActivityForResult(enabler, REQUEST_ENABLE);
+
+        //enable
+        _bluetooth.enable();
+
+        Intent enabler = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+        startActivityForResult(enabler, REQUEST_DISCOVERABLE);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -30,10 +56,21 @@ public class MainActivity extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_add_BT:
+                onEnableButtonClicked();
+                Intent enabler = new Intent(this, DiscoveryActivity.class);
+                startActivity(enabler);
+                return true;
+            case R.id.action_settings:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    public boolean isBluetoothEnabled() {
+        return _bluetooth.isEnabled();
     }
 }

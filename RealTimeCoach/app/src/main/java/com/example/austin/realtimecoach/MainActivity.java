@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
                 return super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
+        //return super.onOptionsItemSelected(item);
     }
     public boolean isBluetoothEnabled() {
         return _bluetooth.isEnabled();

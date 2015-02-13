@@ -6,5 +6,7 @@
     <string name="action_settings">Settings</string>
     <string name="action_add_BT">Add BT</string>
     <string name="action_add_player">Add Player</string>
+    <string name="find">Find your Real Time Coach</string>
+    <string name="app_name_with_spaces">Find your Real Time Coach</string>
 
 </resources>

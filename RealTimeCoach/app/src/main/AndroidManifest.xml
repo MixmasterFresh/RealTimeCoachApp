@@ -19,7 +19,7 @@
         </activity>
         <activity
             android:name="com.example.austin.realtimecoach.DiscoveryActivity"
-            android:label="@string/app_name" >
+            android:label="@string/find" >
             <intent-filter>
                 <action android:name="android.intent.action.RUN" />
 

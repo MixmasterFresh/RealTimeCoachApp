@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
     private static final int  REQUEST_ENABLE      = 0x1;
     /* request BT discover */
     private static final int  REQUEST_DISCOVERABLE  = 0x2;
+    Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,23 +35,19 @@ public class MainActivity extends Activity {
         //Intent enabler = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         //startActivityForResult(enabler, REQUEST_ENABLE);
         //enable
-        Button btn = (Button) findViewById(R.id.action_add_BT);
+        MenuItem item = menu.findItem(R.id.action_add_BT);
 
         if(isBluetoothEnabled())
         {
             _bluetooth.disable();
-            btn.setEnabled(false);
+            item.setEnabled(false);
         }
         else
         {
             _bluetooth.enable();
-            if(counter==0)
-            {
-                Intent enabler = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                startActivityForResult(enabler, REQUEST_DISCOVERABLE);
-                btn.setEnabled(true);
-            }
-            counter++;
+            Intent enabler = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            startActivityForResult(enabler, REQUEST_DISCOVERABLE);
+            item.setEnabled(true);
         }
     }
 
@@ -58,6 +55,18 @@ public class MainActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        this.menu=menu;
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+        MenuItem item = menu.findItem(R.id.action_add_BT);
+        item.setEnabled(false);
+        MenuItem item2 = menu.findItem(R.id.action_add_player);
+        item2.setEnabled(false);
+        super.onPrepareOptionsMenu(menu);
         return true;
     }
 
@@ -66,17 +75,17 @@ public class MainActivity extends Activity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
+        MenuItem item1 = menu.findItem(R.id.action_add_player);
         //noinspection SimplifiableIfStatement
         switch (item.getItemId())
         {
             case R.id.action_add_BT:
-                onEnableButtonClicked();
-                return true;
-            case R.id.action_toggle_BT:
                 Intent enabler = new Intent(this, DiscoveryActivity.class);
                 startActivity(enabler);
+                item1.setEnabled(true);
+                return true;
+            case R.id.action_toggle_BT:
+                onEnableButtonClicked();
                 return true;
             case R.id.action_add_player:
                 Intent addPlayer = new Intent(this, AddPlayerActivity.class);
@@ -89,6 +98,11 @@ public class MainActivity extends Activity {
 
         //return super.onOptionsItemSelected(item);
     }
+    public void addPlayer(String name,int number,int xbee)
+    {
+        players.add(new Player(name,number,xbee));
+    }
+
     public boolean isBluetoothEnabled()
     {
         return _bluetooth.isEnabled();

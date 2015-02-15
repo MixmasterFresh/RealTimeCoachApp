@@ -10,13 +10,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-
+import java.util.ArrayList;
 
 
 public class MainActivity extends Activity {
     /* Get Default Adapter */
     private BluetoothAdapter  _bluetooth = BluetoothAdapter.getDefaultAdapter();
-
+    private int counter=0;
+    public ArrayList<Player> players = new ArrayList<>();
     /* request BT enable */
     private static final int  REQUEST_ENABLE      = 0x1;
     /* request BT discover */
@@ -26,19 +27,31 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button open_BT = (Button) findViewById(R.id.action_add_BT);
     }
 
     public void onEnableButtonClicked()
     {
         //Intent enabler = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         //startActivityForResult(enabler, REQUEST_ENABLE);
-
         //enable
-        _bluetooth.enable();
+        Button btn = (Button) findViewById(R.id.action_add_BT);
 
-        Intent enabler = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        startActivityForResult(enabler, REQUEST_DISCOVERABLE);
+        if(isBluetoothEnabled())
+        {
+            _bluetooth.disable();
+            btn.setEnabled(false);
+        }
+        else
+        {
+            _bluetooth.enable();
+            if(counter==0)
+            {
+                Intent enabler = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                startActivityForResult(enabler, REQUEST_DISCOVERABLE);
+                btn.setEnabled(true);
+            }
+            counter++;
+        }
     }
 
     @Override
@@ -56,12 +69,18 @@ public class MainActivity extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        switch (item.getItemId()) {
+        switch (item.getItemId())
+        {
             case R.id.action_add_BT:
                 onEnableButtonClicked();
+                return true;
+            case R.id.action_toggle_BT:
                 Intent enabler = new Intent(this, DiscoveryActivity.class);
                 startActivity(enabler);
                 return true;
+            case R.id.action_add_player:
+                Intent addPlayer = new Intent(this, AddPlayerActivity.class);
+                startActivity(addPlayer);
             case R.id.action_settings:
                 return true;
             default:
@@ -70,7 +89,8 @@ public class MainActivity extends Activity {
 
         //return super.onOptionsItemSelected(item);
     }
-    public boolean isBluetoothEnabled() {
+    public boolean isBluetoothEnabled()
+    {
         return _bluetooth.isEnabled();
     }
 }

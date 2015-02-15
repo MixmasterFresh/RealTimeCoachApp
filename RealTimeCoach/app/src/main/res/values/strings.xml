@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">RealTimeCoach</string>
+    <string name="app_name">Real Time Coach</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="action_add_BT">Add BT</string>
+    <string name="action_add_BT">Add Real Time Coach</string>
     <string name="action_add_player">Add Player</string>
     <string name="find">Find your Real Time Coach</string>
     <string name="app_name_with_spaces">Find your Real Time Coach</string>
+    <string name="add_player">Add Player</string>
+    <string name="bt_enabled">false</string>
+    <string name="action_toggle_BT">Toggle Bluetooth</string>
+    <string name="xbee">Unit Number</string>
+    <string name="athlete_name">Athlete Name</string>
+    <string name="number">Number</string>
 
 </resources>

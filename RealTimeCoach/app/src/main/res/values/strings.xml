@@ -14,5 +14,6 @@
     <string name="xbee">Unit Number</string>
     <string name="athlete_name">Athlete Name</string>
     <string name="number">Number</string>
+    <string name="server">Server</string>
 
 </resources>

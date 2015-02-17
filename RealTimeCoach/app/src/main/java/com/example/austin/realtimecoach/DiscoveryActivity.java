@@ -145,6 +145,8 @@ public class DiscoveryActivity  extends ListActivity
         Intent result = new Intent();
         result.putExtra(BluetoothDevice.EXTRA_DEVICE, _devices.get(position));
         setResult(RESULT_OK, result);
+        MainActivity.device = _devices.get(position);
+        MainActivity.checker=true;
         finish();
     }
 }

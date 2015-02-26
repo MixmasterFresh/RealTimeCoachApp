@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import android.widget.Toast;
 import android.content.Context;
 import android.widget.EditText;
+
 /**
  * Created by Austin on 2/11/2015.
  */
@@ -22,10 +23,12 @@ public class AddPlayerActivity extends Activity
 {
 
     /* Get Default Adapter */
-    private String name="";
+    private String first_name="";
+    private String last_name="";
     private int number=-1;
     private int xbee=-1;
-    private EditText nameEntry;
+    private EditText first_name_entry;
+    private EditText last_name_entry;
     private EditText numberEntry;
     private EditText xbeeEntry;
     @Override
@@ -33,18 +36,20 @@ public class AddPlayerActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_player);
-        nameEntry=(EditText)findViewById(R.id.editText);
-        numberEntry=(EditText)findViewById(R.id.editText2);
-        xbeeEntry=(EditText)findViewById(R.id.editText3);
+        first_name_entry=(EditText)findViewById(R.id.first);
+        last_name_entry=(EditText)findViewById(R.id.last);
+        numberEntry=(EditText)findViewById(R.id.number);
+        xbeeEntry=(EditText)findViewById(R.id.address);
         final Button button = (Button) findViewById(R.id.final_add_player);
         button.setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View v)
             {
-                name=nameEntry.toString();
-                number=Integer.parseInt(numberEntry.toString());
-                xbee=Integer.parseInt(xbeeEntry.toString());
-                if(name.equals("")||number<0||xbee<0)
+                first_name=first_name_entry.getText().toString();
+                last_name=last_name_entry.getText().toString();
+                number=Integer.parseInt(numberEntry.getText().toString());
+                xbee=Integer.parseInt(xbeeEntry.getText().toString());
+                if(last_name.equals("")||number<0||xbee<0)
                 {
                     Context context = getApplicationContext();
                     CharSequence text = "Please use valid information.";
@@ -55,7 +60,8 @@ public class AddPlayerActivity extends Activity
                 }
                 else
                 {
-                    MainActivity.addPlayer(new Player(name,number,xbee));
+                    MainActivity.addPlayer(new Player(first_name,last_name,number,xbee));
+                    finish();
                 }
             }
         });

@@ -15,5 +15,8 @@
     <string name="athlete_name">Athlete Name</string>
     <string name="number">Number</string>
     <string name="server">Server</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="bpm">BPM</string>
 
 </resources>

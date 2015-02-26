@@ -3,16 +3,18 @@ package com.example.austin.realtimecoach;
 /**
  * Created by Austin on 2/14/2015.
  */
-public class Player {
-    String name;
+public class Player implements Comparable {
+    String first_name;
+    String last_name;
     int number;
     int xbee;
     int heartRate;
     double force;
     int severity=0;
-    public Player(String name, int number, int xbee)
+    public Player(String first_name, String last_name, int number, int xbee)
     {
-        this.name=name;
+        this.first_name=first_name;
+        this.last_name=last_name;
         this.number=number;
         this.xbee=xbee;
     }
@@ -35,5 +37,12 @@ public class Player {
         {
             severity=3;
         }
+    }
+
+    @Override
+    public int compareTo(Object player1) {
+        Integer a=new Integer(number);
+        Integer b=new Integer(((Player)player1).number);
+        return a.compareTo(b);
     }
 }

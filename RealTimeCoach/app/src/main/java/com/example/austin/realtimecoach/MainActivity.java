@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import android.app.ListActivity;
@@ -60,6 +61,7 @@ public class MainActivity extends ListActivity {
     private Handler _handler = new Handler();
     static Player change;
     static boolean breaker=true;
+    static boolean menu_created=false;
 
 
     @Override
@@ -74,7 +76,37 @@ public class MainActivity extends ListActivity {
                 e.printStackTrace();
             }
         }
-        showPlayers();
+
+
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(item2e) {
+            try {
+                establishConnection();
+            }
+            catch(Exception e) {
+                item2e=false;
+            }
+        }
+        if(menu_created) {
+            runOnUiThread(new Thread() {
+                public void run() {
+                    try {
+                        showPlayers();
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        Thread.interrupted();
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     public void onEnableButtonClicked()
@@ -89,7 +121,7 @@ public class MainActivity extends ListActivity {
             {
                 closeBT();
             }
-            catch(IOException e)
+            catch(Exception e)
             {
                 e.printStackTrace();
             }
@@ -108,10 +140,12 @@ public class MainActivity extends ListActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        menu_created=true;
         return true;
+
     }
 
     @Override
@@ -186,7 +220,7 @@ public class MainActivity extends ListActivity {
         return _bluetooth.isEnabled();
     }
 
-    public void establishConnection() throws IOException
+    public static void establishConnection() throws IOException
     {
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
         socket = device.createRfcommSocketToServiceRecord(uuid);
@@ -307,42 +341,9 @@ public class MainActivity extends ListActivity {
 
     protected boolean showPlayers()
     {
-        List<String> list = new ArrayList<String>();
-        for (int i = 0, size = players.size(); i < size; ++i)
-        {
-            StringBuilder b = new StringBuilder();
-            Player d = players.get(i);
-            b.append("#");
-            b.append(d.number);
-            b.append("  ");
-            b.append(d.name);
-            b.append('\n');
-            b.append("Heart Rate: ");
-            b.append(d.heartRate);
-            b.append(" BPM");
-            b.append('\n');
-            b.append("Collision Severity: ");
-            if(d.severity==1)
-            {
-                b.append("none");
-            }
-            if(d.severity==2)
-            {
-                b.append("Warning");
-            }
-            if(d.severity==3)
-            {
-                b.append("Severe");
-            }
-            else
-            {
-                b.append("ERROR");
-            }
-            String s = b.toString();
-            list.add(s);
-        }
+        Collections.sort(players);
         Log.d("EF-BTBee", ">>showDevices");
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
+        final UserItemAdapter adapter = new UserItemAdapter(this, R.layout.rtc_line_layout, players);
         _handler.post(new Runnable() {
             public void run()
             {

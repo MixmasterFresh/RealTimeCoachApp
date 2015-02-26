@@ -12,9 +12,19 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:inputType="textPersonName"
-        android:text="@string/athlete_name"
+        android:id="@+id/first"
         android:ems="10"
-        android:id="@+id/editText"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1"
+        android:text="@string/first_name" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:inputType="textPersonName"
+        android:text="@string/last_name"
+        android:ems="10"
+        android:id="@+id/last"
         android:layout_weight="1"
         android:layout_gravity="center_horizontal"/>
 
@@ -23,29 +33,20 @@
         android:layout_height="0dp"
         android:inputType="number"
         android:ems="10"
-        android:id="@+id/editText2"
+        android:id="@+id/number"
         android:text="@string/number"
         android:layout_weight="1"
         android:layout_gravity="center_horizontal"/>
 
     <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:id="@+id/editText3"
-        android:text="Unit Address"
-        android:layout_weight="1"
-        android:layout_gravity="center_horizontal"/>
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/xbee"
-        android:id="@+id/textView2"
-        android:layout_weight="2.21"
-        android:layout_gravity="center_horizontal" />
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/address"
+        android:layout_weight="1"
+        android:text="Unit Address"
+        android:layout_gravity="center_horizontal"/>
 
     <Button
         android:layout_width="wrap_content"

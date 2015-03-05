@@ -27,20 +27,60 @@ public class AddPlayerActivity extends Activity
     private String last_name="";
     private int number=-1;
     private int xbee=-1;
-    private EditText first_name_entry;
-    private EditText last_name_entry;
-    private EditText numberEntry;
-    private EditText xbeeEntry;
+    //private EditText first_name_entry;
+    //private EditText last_name_entry;
+    //private EditText numberEntry;
+    //private EditText xbeeEntry;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_player);
-        first_name_entry=(EditText)findViewById(R.id.first);
-        last_name_entry=(EditText)findViewById(R.id.last);
-        numberEntry=(EditText)findViewById(R.id.number);
-        xbeeEntry=(EditText)findViewById(R.id.address);
+        final EditText first_name_entry=(EditText)findViewById(R.id.first);
+        final EditText last_name_entry=(EditText)findViewById(R.id.last);
+        final EditText numberEntry=(EditText)findViewById(R.id.number);
+        final EditText xbeeEntry=(EditText)findViewById(R.id.address);
         final Button button = (Button) findViewById(R.id.final_add_player);
+        first_name_entry.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus) {
+                    first_name_entry.setHint("");
+                }
+                else {
+                    first_name_entry.setHint("First Name");
+                }
+            }
+        });
+        last_name_entry.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus) {
+                    last_name_entry.setHint("");
+                }
+                else {
+                    last_name_entry.setHint("Last Name");
+                }
+            }
+        });
+        numberEntry.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus) {
+                    numberEntry.setHint("");
+                }
+                else {
+                    numberEntry.setHint("Number");
+                }
+            }
+        });
+        xbeeEntry.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus) {
+                    xbeeEntry.setHint("");
+                }
+                else {
+                    xbeeEntry.setHint("Address");
+                }
+            }
+        });
         button.setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View v)
@@ -66,4 +106,5 @@ public class AddPlayerActivity extends Activity
             }
         });
     }
+
 }

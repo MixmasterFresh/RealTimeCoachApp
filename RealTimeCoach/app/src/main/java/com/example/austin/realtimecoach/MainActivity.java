@@ -62,33 +62,27 @@ public class MainActivity extends ListActivity {
     static Player change;
     static boolean breaker=true;
     static boolean menu_created=false;
+    static Thread xbeeFinder;
+    static String[] dataCatcher=new String[1024];
+    static int index=0;
+    static boolean first=true;
+    static int spot=0;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if(isBluetoothEnabled()&&checker)
-        {
-            try {
-                establishConnection();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-
     }
     @Override
     protected void onResume() {
         super.onResume();
-        if(item2e) {
-            try {
-                establishConnection();
-            }
-            catch(Exception e) {
-                item2e=false;
-            }
+        try {
+            establishConnection();
+            first=false;
+            item2e=true;
+        }
+        catch(Exception e) {
         }
         if(menu_created) {
             runOnUiThread(new Thread() {
@@ -120,6 +114,7 @@ public class MainActivity extends ListActivity {
             try
             {
                 closeBT();
+                first=true;
             }
             catch(Exception e)
             {
@@ -155,10 +150,14 @@ public class MainActivity extends ListActivity {
         {
             iteme=true;
         }
+        else
+        {
+            iteme=false;
+        }
         item = menu.findItem(R.id.action_add_BT);
-        item.setEnabled(iteme);
+        item.setVisible(iteme);
         item2 = menu.findItem(R.id.action_add_player);
-        item2.setEnabled(item2e);
+        item2.setVisible(item2e);
         super.onPrepareOptionsMenu(menu);
         return true;
     }
@@ -174,28 +173,13 @@ public class MainActivity extends ListActivity {
             case R.id.action_add_BT:
                 Intent enabler = new Intent(this, DiscoveryActivity.class);
                 startActivity(enabler);
-                item2e=true;
                 return true;
             case R.id.action_toggle_BT:
                 onEnableButtonClicked();
                 return true;
             case R.id.action_add_player:
-                if(checker)
-                {
-                    Intent addPlayer = new Intent(this, AddPlayerActivity.class);
-                    startActivity(addPlayer);
-                }
-                else
-                {
-                    Context context = getApplicationContext();
-                    CharSequence text = "Please use a valid bluetooth connection!";
-                    int duration = Toast.LENGTH_SHORT;
-
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
-                }
-                return true;
-            case R.id.action_settings:
+                Intent addPlayer = new Intent(this, AddPlayerActivity.class);
+                startActivity(addPlayer);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -204,12 +188,15 @@ public class MainActivity extends ListActivity {
         //return super.onOptionsItemSelected(item);
     }
 
+
     protected void onListItemClick(ListView l, View v, int position, long id)
     {
         change = players.get(position);
+        spot=0;
         Intent editor = new Intent(this, UpdatePlayerActivity.class);
         startActivity(editor);
     }
+
     public static void addPlayer(Player player)
     {
         players.add(player);
@@ -233,7 +220,8 @@ public class MainActivity extends ListActivity {
     static void beginListenForData()
     {
         final Handler handler = new Handler();
-        final byte delimiter = 10; //This is the ASCII code for a newline character
+        final byte delimiter = 59;
+        final byte stopper = 33;
         data="";
         stopWorker = false;
         readBufferPosition = 0;
@@ -259,8 +247,14 @@ public class MainActivity extends ListActivity {
                                     if (b == delimiter) {
                                         byte[] encodedBytes = new byte[readBufferPosition];
                                         System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                        data = new String(encodedBytes, "US-ASCII");
+                                        data = new String(encodedBytes, "UTF-8");
                                         readBufferPosition = 0;
+                                        dataCatcher[index]=data;
+
+                                        index++;
+                                    }
+                                    else if (b==stopper) {
+                                        stopWorker=true;
                                     }
                                     else
                                     {
@@ -270,8 +264,8 @@ public class MainActivity extends ListActivity {
                                 catch(ArrayIndexOutOfBoundsException e)
                                 {
                                     e.printStackTrace();
-                                }
                             }
+                        }
                         }
                     }
                     catch (IOException ex)
@@ -284,45 +278,46 @@ public class MainActivity extends ListActivity {
 
         workerThread.start();
     }
+    public static void obtain_valid_addresses()
+    {
+        xbees=new ArrayList<>();
+
+        xbeeFinder = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    int lastCut=0;
+                    Timer timer = new Timer();
+                    sendData("!!!");
+                    beginListenForData();
+                    while (data.length() == 0 && breaker) {
+                        timer.schedule(new Ender(), 1000);
+                    }
+                    timer.cancel();
+                    for (int i = 0; i < data.length(); i++) {
+                        if (data.charAt(i) == ',') {
+                            xbees.add(Integer.parseInt(data.substring(lastCut + 1, i)));
+                            lastCut = i;
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
     public static boolean isValidAddress(int x)
     {
         boolean check=false;
-        xbees=new ArrayList<>();
-        int lastCut=0;
-        try
+        for(Integer value:xbees)
         {
-            Timer timer=new Timer();
-            sendData("5");
-            beginListenForData();
-            while(data.length()!=0&&breaker)
+            if(value.intValue()==x)
             {
-                timer.schedule(new Ender(),1000);
+                check=true;
             }
-            timer.cancel();
-            for(int i=0;i<data.length();i++)
-            {
-                if(data.charAt(i)==',')
-                {
-                    xbees.add(Integer.parseInt(data.substring(lastCut+1,i)));
-                    lastCut=i;
-                }
-            }
-            for(Integer value:xbees)
-            {
-                if(value.intValue()==x)
-                {
-                    check=true;
-                }
-            }
-            breaker=true;
-            return check;
         }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-            return check;
-        }
+        breaker=true;
+        return check;
     }
 
     void closeBT() throws IOException

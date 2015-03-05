@@ -4,10 +4,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <application
+
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/CustomActionBarTheme" >
         <activity
             android:name="com.example.austin.realtimecoach.MainActivity"
             android:label="@string/app_name" >
@@ -29,6 +30,15 @@
         <activity
             android:name="com.example.austin.realtimecoach.AddPlayerActivity"
             android:label="@string/add_player" >
+            <intent-filter>
+                <action android:name="android.intent.action.RUN" />
+
+                <category android:name="android.intent.category.OPENABLE" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.example.austin.realtimecoach.UpdatePlayerActivity"
+            android:label="@string/update_player" >
             <intent-filter>
                 <action android:name="android.intent.action.RUN" />
 

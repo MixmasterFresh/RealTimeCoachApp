@@ -18,5 +18,6 @@
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
     <string name="bpm">BPM</string>
+    <string name="update_player">Update Player</string>
 
 </resources>

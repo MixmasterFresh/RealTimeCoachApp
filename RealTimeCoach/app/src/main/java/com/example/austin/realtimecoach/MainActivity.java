@@ -67,6 +67,9 @@ public class MainActivity extends ListActivity {
     static int index=0;
     static boolean first=true;
     static int spot=0;
+    static Thread connector;
+    static Thread updater;
+    static String data_temp;
 
 
     @Override
@@ -77,19 +80,41 @@ public class MainActivity extends ListActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            establishConnection();
-            first=false;
-            item2e=true;
-        }
-        catch(Exception e) {
-        }
+        connector = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    establishConnection();
+                    first = false;
+                    item2e = true;
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        beginListenForData();
+        updater = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while (true) {
+                        updateData();
+                    }
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         if(menu_created) {
             runOnUiThread(new Thread() {
                 public void run() {
                     try {
-                        showPlayers();
-                        Thread.sleep(500);
+                        while (true) {
+                            showPlayers();
+                            Thread.sleep(1000);
+                        }
                     } catch (InterruptedException e) {
                         Thread.interrupted();
                     }
@@ -184,8 +209,6 @@ public class MainActivity extends ListActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-
-        //return super.onOptionsItemSelected(item);
     }
 
 
@@ -277,6 +300,13 @@ public class MainActivity extends ListActivity {
         });
 
         workerThread.start();
+    }
+    public static void updateData() {
+        if(!data.equals("")) {
+            data_temp = data;
+            data = "";
+            //TODO: parse the data into meaningful bites so that it can be passed to the player objects without issue.
+        }
     }
     public static void obtain_valid_addresses()
     {

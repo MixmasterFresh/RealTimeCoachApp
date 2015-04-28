@@ -147,6 +147,7 @@ public class DiscoveryActivity  extends ListActivity
         setResult(RESULT_OK, result);
         MainActivity.device = _devices.get(position);
         MainActivity.checker=true;
+        MainActivity.numAddresses = 0;
         finish();
     }
 }

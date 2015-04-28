@@ -57,7 +57,7 @@ public class MainActivity extends ListActivity {
     static int readBufferPosition;
     static int counter;
     static volatile boolean stopWorker;
-    static String data;
+    static int[][] data;
     private Handler _handler = new Handler();
     static Player change;
     static boolean breaker=true;
@@ -67,7 +67,11 @@ public class MainActivity extends ListActivity {
     static int index=0;
     static boolean first=true;
     static int spot=0;
-
+    static int numAddresses;
+    static int accessIndex;
+    static Thread connector;
+    static Thread updater;
+    static String data_temp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,20 +81,43 @@ public class MainActivity extends ListActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            establishConnection();
-            first=false;
-            item2e=true;
-        }
-        catch(Exception e) {
-        }
+        connector = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    establishConnection();
+                    first = false;
+                    item2e = true;
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        beginListenForData();
+        updater = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                    try {
+                        while (true) {
+                            updateData();
+                        }
+                    }
+                    catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         if(menu_created) {
             runOnUiThread(new Thread() {
                 public void run() {
                     try {
-                        showPlayers();
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
+                        while (true) {
+                            showPlayers();
+                            Thread.sleep(1000);
+                        }
+                    }
+                    catch (InterruptedException e) {
                         Thread.interrupted();
                     }
                 }
@@ -216,13 +243,12 @@ public class MainActivity extends ListActivity {
         input = socket.getInputStream();
 
     }
-
     static void beginListenForData()
     {
         final Handler handler = new Handler();
         final byte delimiter = 59;
         final byte stopper = 33;
-        data="";
+        data = new int[numAddresses][10];
         stopWorker = false;
         readBufferPosition = 0;
         readBuffer = new byte[1024];
@@ -247,7 +273,10 @@ public class MainActivity extends ListActivity {
                                     if (b == delimiter) {
                                         byte[] encodedBytes = new byte[readBufferPosition];
                                         System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                        data = new String(encodedBytes, "UTF-8");
+                                        synchronized(data){
+                                            data[accessIndex] = ;
+                                        }
+
                                         readBufferPosition = 0;
                                         dataCatcher[index]=data;
 
@@ -278,6 +307,13 @@ public class MainActivity extends ListActivity {
 
         workerThread.start();
     }
+
+    public static void updateData() {
+        if(!(data == null)) {
+            //TODO: parse the data into meaningful bites so that it can be passed to the player objects without issue.
+        }
+    }
+
     public static void obtain_valid_addresses()
     {
         xbees=new ArrayList<>();

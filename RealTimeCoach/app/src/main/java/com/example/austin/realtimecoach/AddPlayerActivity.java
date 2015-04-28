@@ -100,7 +100,10 @@ public class AddPlayerActivity extends Activity
                 }
                 else
                 {
+                    //TODO: Insert address check
                     MainActivity.addPlayer(new Player(first_name,last_name,number,xbee));
+                    MainActivity.numAddresses++;
+                    MainActivity.data = new int[MainActivity.numAddresses][10];
                     finish();
                 }
             }

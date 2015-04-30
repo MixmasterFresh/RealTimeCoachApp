@@ -29,6 +29,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class MainActivity extends ListActivity {
     /* Get Default Adapter */
@@ -41,7 +43,7 @@ public class MainActivity extends ListActivity {
     /* request BT discover */
     private static final int  REQUEST_DISCOVERABLE  = 0x2;
     static BluetoothDevice device;
-    static ArrayList<Integer> xbees=new ArrayList<>();
+    static ArrayList<Short> xbees=new ArrayList<>();
     static Menu menu;
     static MenuItem item;
     static MenuItem item2;
@@ -57,7 +59,7 @@ public class MainActivity extends ListActivity {
     static int readBufferPosition;
     static int counter;
     static volatile boolean stopWorker;
-    static int[][] data;
+    static short[][] data;
     private Handler _handler = new Handler();
     static Player change;
     static boolean breaker=true;
@@ -68,10 +70,13 @@ public class MainActivity extends ListActivity {
     static boolean first=true;
     static int spot=0;
     static int numAddresses;
-    static int accessIndex;
+    static int accessIndex=0;
+    static int crossaccessIndex = 0;
     static Thread connector;
     static Thread updater;
-    static String data_temp;
+    static byte leftover;
+    static ByteBuffer buffer;
+    static Thread dataUpdater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -248,7 +253,8 @@ public class MainActivity extends ListActivity {
         final Handler handler = new Handler();
         final byte delimiter = 59;
         final byte stopper = 33;
-        data = new int[numAddresses][10];
+
+        data = new short[numAddresses][10];
         stopWorker = false;
         readBufferPosition = 0;
         readBuffer = new byte[1024];
@@ -258,6 +264,9 @@ public class MainActivity extends ListActivity {
             {
                 while(!Thread.currentThread().isInterrupted() && !stopWorker)
                 {
+                    boolean isleftover = false;
+
+                    ByteBuffer bb;
                     try
                     {
                         int bytesAvailable = input.available();
@@ -271,14 +280,44 @@ public class MainActivity extends ListActivity {
                                 {
                                     byte b = packetBytes[i];
                                     if (b == delimiter) {
-                                        byte[] encodedBytes = new byte[readBufferPosition];
-                                        System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+                                        byte[] encodedBytes;
+                                        if(isleftover) {
+                                            encodedBytes = new byte[readBufferPosition+1];
+                                            System.arraycopy(readBuffer, 0, encodedBytes, 1, encodedBytes.length - 1);
+                                            encodedBytes[0] = leftover;
+                                        }
+                                        else {
+                                            encodedBytes = new byte[readBufferPosition];
+                                            System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+                                        }
                                         synchronized(data){
-                                            data[accessIndex] = ;
+                                            if(encodedBytes.length % 2 == 1) {
+                                                leftover = encodedBytes[encodedBytes.length-1];
+                                                isleftover = true;
+                                            }
+                                            for(int j = crossaccessIndex; j < encodedBytes.length; j = j + 2) {
+                                                bb = ByteBuffer.allocate(2);
+                                                bb.order(ByteOrder.LITTLE_ENDIAN);
+                                                bb.put(encodedBytes[j]);
+                                                bb.put(encodedBytes[j+1]);
+                                                data[accessIndex][j] = bb.getShort(0);
+                                                if(crossaccessIndex == 9) {
+                                                    crossaccessIndex = 0;
+                                                    if(accessIndex == numAddresses-1){
+                                                        accessIndex = 0;
+                                                    }
+                                                    else{
+                                                        accessIndex++;
+                                                    }
+                                                }
+                                                else {
+                                                    crossaccessIndex++;
+                                                }
+                                            }
+
                                         }
 
                                         readBufferPosition = 0;
-                                        dataCatcher[index]=data;
 
                                         index++;
                                     }
@@ -309,11 +348,26 @@ public class MainActivity extends ListActivity {
     }
 
     public static void updateData() {
-        if(!(data == null)) {
-            //TODO: parse the data into meaningful bites so that it can be passed to the player objects without issue.
-        }
-    }
+        dataUpdater = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true)
+                {
+                    if (!(data == null)) {
+                        synchronized (data){
+                            for(short[] s:data){
 
+                            }
+                        }
+                        //TODO: parse the data into meaningful bites so that it can be passed to the player objects without issue.
+                    } else {
+
+                    }
+                }
+            }
+        });dataUpdater.start();
+    }
+    /*
     public static void obtain_valid_addresses()
     {
         xbees=new ArrayList<>();
@@ -341,11 +395,12 @@ public class MainActivity extends ListActivity {
             }
         });
     }
+    */
 
     public static boolean isValidAddress(int x)
     {
         boolean check=false;
-        for(Integer value:xbees)
+        for(Short value:xbees)
         {
             if(value.intValue()==x)
             {
@@ -384,9 +439,11 @@ public class MainActivity extends ListActivity {
         return true;
     }
 
-    static void sendData(String data) throws IOException
+    static void sendData(short data) throws IOException
     {
-        output.write(data.getBytes());
+        buffer = ByteBuffer.allocate(2);
+        buffer.putShort(data);
+        output.write(buffer.array());
     }
 
     static class Ender extends TimerTask {

@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import android.widget.Toast;
 import android.content.Context;
 import android.widget.EditText;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Austin on 2/11/2015.
@@ -27,10 +29,13 @@ public class AddPlayerActivity extends Activity
     private String last_name="";
     private int number=-1;
     private int xbee=-1;
+    private short[][] check =new short[MainActivity.numAddresses][10];
     //private EditText first_name_entry;
     //private EditText last_name_entry;
     //private EditText numberEntry;
     //private EditText xbeeEntry;
+    boolean isValid = false;
+    Timer timer;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -89,6 +94,23 @@ public class AddPlayerActivity extends Activity
                 last_name=last_name_entry.getText().toString();
                 number=Integer.parseInt(numberEntry.getText().toString());
                 xbee=Integer.parseInt(xbeeEntry.getText().toString());
+                System.arraycopy(MainActivity.data,0,check,0,check.length);
+                isValid = false;
+                //Address Validity Check
+                try {
+                    timer = new Timer();
+                    MainActivity.sendData((short) xbee);
+                    timer.schedule(new MainActivity.Ender(), 1000);
+                    while(MainActivity.breaker) {
+                        if(!check.equals(MainActivity.data)){
+                            isValid = true;
+                        }
+                    }
+
+                }
+                catch(Exception e) {
+
+                }
                 if(last_name.equals("")||number<0||xbee<0)
                 {
                     Context context = getApplicationContext();
@@ -98,12 +120,20 @@ public class AddPlayerActivity extends Activity
                     Toast toast = Toast.makeText(context, text, duration);
                     toast.show();
                 }
+                else if(!isValid){
+                    Context context = getApplicationContext();
+                    CharSequence text = "Not a valid address. \nMake sure the unit is on.";
+                    int duration = Toast.LENGTH_SHORT;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                }
                 else
                 {
-                    //TODO: Insert address check
+                    MainActivity.xbees.add(new Short((short)xbee));
                     MainActivity.addPlayer(new Player(first_name,last_name,number,xbee));
                     MainActivity.numAddresses++;
-                    MainActivity.data = new int[MainActivity.numAddresses][10];
+                    MainActivity.data = new short[MainActivity.numAddresses][10];
                     finish();
                 }
             }

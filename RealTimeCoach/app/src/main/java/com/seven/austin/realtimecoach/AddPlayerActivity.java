@@ -128,6 +128,7 @@ public class AddPlayerActivity extends Activity
                     MainActivity.addPlayer(new Player(first_name, last_name, number, xbee));
                     MainActivity.numAddresses++;
                     MainActivity.data = new short[MainActivity.numAddresses][11];
+                    MainActivity.sorted = false;
                     finish();
                 }
             }

@@ -75,6 +75,10 @@ public class MainActivity extends ListActivity {
     static boolean isValid;
     static short[][] check;
     static Thread communicator;
+    static Thread shower;
+    static boolean connected = false;
+    static boolean sorted = false;
+    UserItemAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,11 +88,21 @@ public class MainActivity extends ListActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        connector = new Thread(new Runnable() {
+        try {
+            establishConnection();
+            updateData();
+            first = false;
+            item2e = true;
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+       /* connector = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     establishConnection();
+                    updateData();
                     first = false;
                     item2e = true;
                 }
@@ -97,9 +111,10 @@ public class MainActivity extends ListActivity {
                 }
             }
         });
+        connector.start();*/
         updateData();
-        if(menu_created) {
-            runOnUiThread(new Thread() {
+        if(connected) {
+            shower = new Thread(new Runnable() {
                 public void run() {
                     try {
                         while (true) {
@@ -112,6 +127,7 @@ public class MainActivity extends ListActivity {
                     }
                 }
             });
+            shower.start();
         }
     }
 
@@ -176,6 +192,22 @@ public class MainActivity extends ListActivity {
         item2 = menu.findItem(R.id.action_add_player);
         item2.setVisible(item2e);
         super.onPrepareOptionsMenu(menu);
+        /*connector = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    establishConnection();
+                    updateData();
+                    first = false;
+                    item2e = true;
+                    item2.setVisible(item2e);
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        connector.start();*/
         return true;
     }
 
@@ -232,6 +264,7 @@ public class MainActivity extends ListActivity {
         output = socket.getOutputStream();
         input = socket.getInputStream();
         beginListenForData();
+        connected =true;
 
     }
     static void beginListenForData()
@@ -471,9 +504,13 @@ public class MainActivity extends ListActivity {
 
     protected boolean showPlayers()
     {
-        Collections.sort(players);
+        if(!sorted){
+            Collections.sort(players);
+            sorted = true;
+            UserItemAdapter adapter = new UserItemAdapter(this, R.layout.rtc_line_layout, players);
+        }
+
         Log.d("EF-BTBee", ">>showDevices");
-        final UserItemAdapter adapter = new UserItemAdapter(this, R.layout.rtc_line_layout, players);
         _handler.post(new Runnable() {
             public void run()
             {

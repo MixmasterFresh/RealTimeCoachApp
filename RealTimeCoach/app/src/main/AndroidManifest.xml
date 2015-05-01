@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.austin.realtimecoach" >
+    package="com.seven.austin.realtimecoach" >
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <application
@@ -10,7 +10,7 @@
         android:label="@string/app_name"
         android:theme="@style/CustomActionBarTheme" >
         <activity
-            android:name="com.example.austin.realtimecoach.MainActivity"
+            android:name="com.seven.austin.realtimecoach.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.austin.realtimecoach.DiscoveryActivity"
+            android:name="com.seven.austin.realtimecoach.DiscoveryActivity"
             android:label="@string/find" >
             <intent-filter>
                 <action android:name="android.intent.action.RUN" />
@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.austin.realtimecoach.AddPlayerActivity"
+            android:name="com.seven.austin.realtimecoach.AddPlayerActivity"
             android:label="@string/add_player" >
             <intent-filter>
                 <action android:name="android.intent.action.RUN" />
@@ -37,7 +37,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.austin.realtimecoach.UpdatePlayerActivity"
+            android:name="com.seven.austin.realtimecoach.UpdatePlayerActivity"
             android:label="@string/update_player" >
             <intent-filter>
                 <action android:name="android.intent.action.RUN" />
@@ -46,7 +46,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.austin.realtimecoach.ServerSocketActivity"
+            android:name="com.seven.austin.realtimecoach.ServerSocketActivity"
             android:label="@string/server" >
             <intent-filter>
                 <action android:name="android.intent.action.RUN" />

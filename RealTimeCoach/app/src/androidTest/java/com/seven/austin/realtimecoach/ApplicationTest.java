@@ -1,4 +1,4 @@
-package com.example.austin.realtimecoach;
+package com.seven.austin.realtimecoach;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

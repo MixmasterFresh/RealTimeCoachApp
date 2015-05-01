@@ -5,7 +5,7 @@ android {
     buildToolsVersion "21.1.1"
 
     defaultConfig {
-        applicationId "com.example.austin.realtimecoach"
+        applicationId "com.seven.austin.realtimecoach"
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 1

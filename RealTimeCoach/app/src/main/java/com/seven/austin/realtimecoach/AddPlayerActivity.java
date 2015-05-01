@@ -1,22 +1,14 @@
-package com.example.austin.realtimecoach;
+package com.seven.austin.realtimecoach;
 
 
 import android.app.Activity;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import java.util.ArrayList;
 import android.widget.Toast;
 import android.content.Context;
 import android.widget.EditText;
 import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by Austin on 2/11/2015.
@@ -96,14 +88,16 @@ public class AddPlayerActivity extends Activity
                 xbee=Integer.parseInt(xbeeEntry.getText().toString());
                 System.arraycopy(MainActivity.data,0,check,0,check.length);
                 isValid = false;
+                MainActivity.breaker = true;
                 //Address Validity Check
                 try {
                     timer = new Timer();
                     MainActivity.sendData((short) xbee);
-                    timer.schedule(new MainActivity.Ender(), 1000);
+                    timer.schedule(new MainActivity.Ender(), 500);
                     while(MainActivity.breaker) {
                         if(!check.equals(MainActivity.data)){
                             isValid = true;
+                            break;
                         }
                     }
 
@@ -131,9 +125,9 @@ public class AddPlayerActivity extends Activity
                 else
                 {
                     MainActivity.xbees.add(new Short((short)xbee));
-                    MainActivity.addPlayer(new Player(first_name,last_name,number,xbee));
+                    MainActivity.addPlayer(new Player(first_name, last_name, number, xbee));
                     MainActivity.numAddresses++;
-                    MainActivity.data = new short[MainActivity.numAddresses][10];
+                    MainActivity.data = new short[MainActivity.numAddresses][11];
                     finish();
                 }
             }

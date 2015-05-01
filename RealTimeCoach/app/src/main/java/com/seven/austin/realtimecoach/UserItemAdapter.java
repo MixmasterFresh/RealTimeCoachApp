@@ -1,4 +1,4 @@
-package com.example.austin.realtimecoach;
+package com.seven.austin.realtimecoach;
 
 import android.widget.ArrayAdapter;
 import android.content.Context;
@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.widget.TextView;
-import android.app.Activity;
 
 /**
  * Created by Austin on 2/26/2015.
@@ -30,11 +29,12 @@ public class UserItemAdapter extends ArrayAdapter<Player> {
         }
 
         Player player = players.get(position);
-        if (player != null) {
+        if (player != null && player.valid) {
             TextView first_name = (TextView) v.findViewById(R.id.first_display);
             TextView last_name = (TextView) v.findViewById(R.id.last_display);
             TextView number = (TextView) v.findViewById(R.id.number_display);
             TextView bpm = (TextView) v.findViewById(R.id.bpm_display);
+            TextView bpmL = (TextView) v.findViewById(R.id.bpm_label);
 
             if (first_name != null) {
                 first_name.setText(player.first_name);
@@ -46,7 +46,30 @@ public class UserItemAdapter extends ArrayAdapter<Player> {
 
             if(bpm != null) {
                 bpm.setText(String.valueOf(player.heartRate));
+                bpmL.setText("BPM");
             }
+
+            if(number != null) {
+                number.setText(String.valueOf(player.number));
+            }
+        }
+        else if(player != null) {
+            TextView first_name = (TextView) v.findViewById(R.id.first_display);
+            TextView last_name = (TextView) v.findViewById(R.id.last_display);
+            TextView number = (TextView) v.findViewById(R.id.number_display);
+            TextView bpm = (TextView) v.findViewById(R.id.bpm_display);
+            TextView bpmL = (TextView) v.findViewById(R.id.bpm_label);
+
+            if (first_name != null) {
+                first_name.setText(player.first_name);
+            }
+
+            if(last_name != null) {
+                last_name.setText(player.last_name);
+            }
+
+            bpm.setText("Connection");
+            bpmL.setText("Lost");
 
             if(number != null) {
                 number.setText(String.valueOf(player.number));

@@ -1,4 +1,4 @@
-package com.example.austin.realtimecoach;
+package com.seven.austin.realtimecoach;
 
 /**
  * Created by Austin on 2/15/2015.
@@ -13,15 +13,12 @@ import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 public class ServerSocketActivity extends ListActivity
 {

@@ -1,4 +1,4 @@
-package com.example.austin.realtimecoach;
+package com.seven.austin.realtimecoach;
 import java.util.ArrayList;
 import java.util.List;
 

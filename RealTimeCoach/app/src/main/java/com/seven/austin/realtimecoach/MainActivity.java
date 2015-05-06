@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 import android.app.ListActivity;
@@ -25,6 +26,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.io.InputStreamReader;
 
 public class MainActivity extends ListActivity {
     /* Get Default Adapter */
@@ -53,7 +57,7 @@ public class MainActivity extends ListActivity {
     static int readBufferPosition;
     static int counter;
     static volatile boolean stopWorker;
-    static short[][] data;
+    static short[] data;
     private Handler _handler = new Handler();
     static Player change;
     static boolean breaker=true;
@@ -79,6 +83,13 @@ public class MainActivity extends ListActivity {
     static boolean connected = false;
     static boolean sorted = false;
     UserItemAdapter adapter;
+    static BufferedReader in;
+    static PrintWriter out;
+    byte lastin = 0;
+    static boolean isleftover;
+    static boolean sames;
+    static Integer same = new Integer(0);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +101,12 @@ public class MainActivity extends ListActivity {
         super.onResume();
         try {
             establishConnection();
-            updateData();
+            Context context = getApplicationContext();
+            CharSequence text = "Connected";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
             first = false;
             item2e = true;
         }
@@ -112,12 +128,15 @@ public class MainActivity extends ListActivity {
             }
         });
         connector.start();*/
-        updateData();
-        if(connected) {
+
+        if(connected && xbees.size()!=0) {
             shower = new Thread(new Runnable() {
                 public void run() {
                     try {
                         while (true) {
+                            for(Short s:xbees){
+                                updateData(s.shortValue());
+                            }
                             showPlayers();
                             Thread.sleep(750);
                         }
@@ -227,6 +246,9 @@ public class MainActivity extends ListActivity {
                 onEnableButtonClicked();
                 return true;
             case R.id.action_add_player:
+                if(shower!=null && shower.isAlive()){
+                    shower.interrupt();
+                }
                 Intent addPlayer = new Intent(this, AddPlayerActivity.class);
                 startActivity(addPlayer);
                 return true;
@@ -263,17 +285,16 @@ public class MainActivity extends ListActivity {
         socket.connect();
         output = socket.getOutputStream();
         input = socket.getInputStream();
+        Log.d("EF-BTBee", ">>connected");
         beginListenForData();
         connected =true;
 
     }
     static void beginListenForData()
     {
-        final Handler handler = new Handler();
-        final byte delimiter = 59;
-        final byte stopper = 33;
-
-        data = new short[numAddresses][11];
+        accessIndex = 0;
+        isleftover = false;
+        data = new short[11];
         stopWorker = false;
         readBufferPosition = 0;
         readBuffer = new byte[1024];
@@ -283,19 +304,87 @@ public class MainActivity extends ListActivity {
             {
                 while(!Thread.currentThread().isInterrupted() && !stopWorker)
                 {
-                    boolean isleftover = false;
-
                     ByteBuffer bb;
                     try
                     {
                         int bytesAvailable = input.available();
                         if(bytesAvailable > 0)
                         {
+                            if(accessIndex == 10){
+                                sames = true;
+                                accessIndex =0;
+                            }
+                            sames = true;
+                            synchronized (same) {
+                                Log.d("same","Crazy change "+same.intValue());
+                                same = new Integer(same.intValue()+1);
+                                Log.d("same","Crazy change2 "+same.intValue());
+                            }
                             byte[] packetBytes = new byte[bytesAvailable];
                             counter=input.read(packetBytes);
-                            for(int i=0;i<counter;i++)
-                            {
-                                try
+                            if(isleftover && packetBytes.length>=1){
+                                bb = ByteBuffer.allocate(2);
+                                bb.order(ByteOrder.LITTLE_ENDIAN);
+
+                                bb.put(leftover);
+                                bb.put(packetBytes[0]);
+
+                                if(accessIndex == 10){
+                                    sames = true;
+                                    accessIndex =0;
+                                }
+                                synchronized (data) {
+                                    data[(accessIndex)] = bb.getShort(0);
+                                }
+                                isleftover=false;
+                                accessIndex++;
+                                for(int i=1;i<counter-1;i+=2){
+                                    sames = true;
+                                    bb = ByteBuffer.allocate(2);
+                                    bb.order(ByteOrder.LITTLE_ENDIAN);
+
+                                    bb.put(packetBytes[i]);
+                                    bb.put(packetBytes[i+1]);
+
+                                    if(accessIndex == 10){
+                                        sames = true;
+                                        accessIndex =0;
+                                    }
+                                    synchronized (data) {
+                                        data[accessIndex] = bb.getShort(0);
+                                    }
+                                    accessIndex++;
+                                }
+                            }
+                            else if(packetBytes.length>1){
+                                for(int i=0;i<counter-1;i+=2){
+                                    sames = true;
+                                    bb = ByteBuffer.allocate(2);
+                                    bb.order(ByteOrder.LITTLE_ENDIAN);
+
+                                    bb.put(packetBytes[i]);
+                                    bb.put(packetBytes[i+1]);
+
+                                    if(accessIndex == 10){
+                                        sames = true;
+                                        accessIndex =0;
+                                    }
+                                    synchronized (data) {
+                                        data[accessIndex] = bb.getShort(0);
+                                    }
+                                    accessIndex++;
+                                }
+                            }
+                            if(accessIndex == 10){
+                                sames = true;
+                                accessIndex =0;
+                            }
+                            if(counter%2!=0&&counter>2){
+                                sames = true;
+                                leftover = packetBytes[counter-1];
+                                isleftover = true;
+                            }
+                                /*try
                                 {
                                     byte b = packetBytes[i];
                                     if (b == delimiter) {
@@ -315,11 +404,7 @@ public class MainActivity extends ListActivity {
                                                 isleftover = true;
                                             }
                                             for(int j = crossaccessIndex; j < encodedBytes.length; j = j + 2) {
-                                                bb = ByteBuffer.allocate(2);
-                                                bb.order(ByteOrder.LITTLE_ENDIAN);
-                                                bb.put(encodedBytes[j]);
-                                                bb.put(encodedBytes[j+1]);
-                                                data[accessIndex][j] = bb.getShort(0);
+
                                                 if(crossaccessIndex == 9) {
                                                     crossaccessIndex = 0;
                                                     if(accessIndex == numAddresses-1){
@@ -351,8 +436,7 @@ public class MainActivity extends ListActivity {
                                 catch(ArrayIndexOutOfBoundsException e)
                                 {
                                     e.printStackTrace();
-                                }
-                            }
+                                }*/
                         }
                     }
                     catch (IOException ex)
@@ -366,81 +450,100 @@ public class MainActivity extends ListActivity {
         workerThread.start();
     }
 
-    public static void updateData() {
-        dataUpdater = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ArrayList<Short> toDelete;
-                int checkIndex;
-                int k;
-
-                while (true)
-                {
-                    toDelete = new ArrayList<>();
-                    if (!(data == null)) {
-                        checkIndex = accessIndex;
-                        //Address Validity Check
-                        try {
-                            for(Short s : xbees) {
-                                synchronized (data) {
-                                    System.arraycopy(MainActivity.data, 0, check, 0, check.length);
-                                    isValid = false;
-                                    breaker = true;
-
-                                    sendData(s.shortValue());
-                                    timer = new Timer();
-                                    timer.schedule(new Ender(), 250);
-                                }
-                                while (breaker) {
-                                    synchronized (data) {
-                                        if (!check.equals(data)) {
-                                            isValid = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if(isValid){
-                                    synchronized (data){
-                                        data[checkIndex][10] = s;
-                                        k = 0;
-                                        for(Player p:players){
-                                            if(p.xbee == (int)s){
-                                                break;
-                                            }
-                                            k++;
-                                        }
-                                        players.get(k).setHeartRate((int)Math.round(.240/((double)(data[checkIndex][6]+data[checkIndex][7]+data[checkIndex][8]+data[checkIndex][9]))));
-                                        players.get(k).setCollisionSeverity(data[checkIndex][3],data[checkIndex][4],data[checkIndex][5]);
-                                        players.get(k).setHeadCollisionSeverity(data[checkIndex][0], data[checkIndex][1], data[checkIndex][2]);
-                                    }
-                                }
-                                else {
-                                    k=0;
-                                    for(Player p:players){
-                                        if(p.xbee == (int)s){
-                                            break;
-                                        }
-                                        k++;
-                                    }
-                                    players.get(k).valid = false;
-                                }
-                            }
-                        }
-                        catch(Exception e) {
-
-                        }
-
-
-
-                    }
-                    else {
-
+    public static boolean updateData(short s) {
+        //TODO:FIND OUT WHY RETURN IS FALSE WHEN DATA IS BEING RECEIVED
+        int k=-1;
+        int i =0;
+        if (!(data == null)) {
+            if(workerThread==null || !workerThread.isAlive()) {
+                beginListenForData();
+            }
+            for(Player p:players){
+                if(p.xbee == (int)s){
+                    k++;
+                    break;
+                }
+                k++;
+            }
+            //Address Validity Check
+            try {
+                isValid = false;
+                breaker = true;
+                sames =false;
+                sendData(s);
+                timer = new Timer();
+                timer.schedule(new Ender(), 250);
+                while (breaker) {
+                    if (sames) {
+                        isValid = true;
+                        break;
                     }
                 }
-            }
-        });
+                Log.d("isValid",""+isValid);
+                if(k==-1 && isValid){
+                    try {
+                        workerThread.interrupt();
+                    }
+                    catch (Exception e) {
 
-        dataUpdater.start();
+                    }
+                    return true;
+                }
+                else if(isValid){
+                    synchronized (data){
+                        data[10] = s;
+                        players.get(k).setHeartRate((int)Math.round(240.0/((double)(data[6]+data[7]+data[8]+data[9]))));
+                        players.get(k).setCollisionSeverity(data[3],data[4],data[5]);
+                        players.get(k).setHeadCollisionSeverity(data[0], data[1], data[2]);
+                        Log.d("Heart Rate", Arrays.toString(data));
+                        Log.d("Heart Rate",""+(int)Math.round(240.0/((double)(data[6]+data[7]+data[8]+data[9]))));
+                    }
+                    try {
+                        workerThread.interrupt();
+                    }
+                    catch (Exception e) {
+
+                    }
+                    return true;
+
+                }
+                else {
+                    k=0;
+                    for(Player p:players){
+                        if(p.xbee == (int)s){
+                            break;
+                        }
+                        k++;
+                    }
+                    players.get(k).valid = false;
+                    try {
+                        workerThread.interrupt();
+                    }
+                    catch (Exception e) {
+
+                    }
+                    return false;
+                }
+            }
+            catch(Exception e) {
+                try {
+                    workerThread.interrupt();
+                }
+                catch (Exception e2) {
+
+                }
+                return false;
+            }
+        }
+        else {
+            try {
+                workerThread.interrupt();
+            }
+            catch (Exception e) {
+
+            }
+            return false;
+        }
     }
     /*
     public static void obtain_valid_addresses()
@@ -504,13 +607,12 @@ public class MainActivity extends ListActivity {
 
     protected boolean showPlayers()
     {
-        if(!sorted){
-            Collections.sort(players);
-            sorted = true;
-            UserItemAdapter adapter = new UserItemAdapter(this, R.layout.rtc_line_layout, players);
-        }
+        Collections.sort(players);
+        sorted = true;
+        final UserItemAdapter adapter = new UserItemAdapter(this, R.layout.rtc_line_layout, players);
 
-        Log.d("EF-BTBee", ">>showDevices");
+
+        Log.d("EF-BTBee", ">>showPlayers");
         _handler.post(new Runnable() {
             public void run()
             {
@@ -522,9 +624,11 @@ public class MainActivity extends ListActivity {
 
     static void sendData(short data) throws IOException
     {
+        Log.d("EF-BTBee", ">>data sending...");
         buffer = ByteBuffer.allocate(2);
         buffer.putShort(data);
         output.write(buffer.array());
+        Log.d("EF-BTBee", ">>data sent");
     }
 
     static class Ender extends TimerTask {

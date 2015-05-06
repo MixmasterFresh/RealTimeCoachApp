@@ -33,7 +33,13 @@ public class Player implements Comparable {
 
     public void setHeartRate(int heartRate)
     {
-        this.heartRate=heartRate;
+        if(heartRate <0) {
+
+        }
+        else {
+            this.heartRate=heartRate;
+        }
+
     }
 
     public void setCollisionSeverity(short a, short b, short c)

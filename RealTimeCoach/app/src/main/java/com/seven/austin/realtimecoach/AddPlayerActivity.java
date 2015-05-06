@@ -3,11 +3,14 @@ package com.seven.austin.realtimecoach;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 import android.content.Context;
 import android.widget.EditText;
+
+import java.io.IOException;
 import java.util.Timer;
 
 /**
@@ -21,7 +24,7 @@ public class AddPlayerActivity extends Activity
     private String last_name="";
     private int number=-1;
     private int xbee=-1;
-    private short[][] check =new short[MainActivity.numAddresses][10];
+    private short[] check =new short[11];
     //private EditText first_name_entry;
     //private EditText last_name_entry;
     //private EditText numberEntry;
@@ -86,25 +89,47 @@ public class AddPlayerActivity extends Activity
                 last_name=last_name_entry.getText().toString();
                 number=Integer.parseInt(numberEntry.getText().toString());
                 xbee=Integer.parseInt(xbeeEntry.getText().toString());
-                System.arraycopy(MainActivity.data,0,check,0,check.length);
+                isValid = MainActivity.updateData(((short)xbee));
+                try {
+                    Thread.currentThread().sleep(300);
+                }
+                catch (Exception e){
+
+                }
+
+                if(isValid){
+                    Log.d("EF-BTBee", ">>roger that");
+                }
+                /*System.arraycopy(MainActivity.data,0,check,0,check.length);
                 isValid = false;
                 MainActivity.breaker = true;
                 //Address Validity Check
                 try {
+                    Log.d("EF-BTBee", ">>data sending...");
+                    MainActivity.sendData(((short)xbee));
+                    Log.d("EF-BTBee", ">>roger that");
                     timer = new Timer();
-                    MainActivity.sendData((short) xbee);
-                    timer.schedule(new MainActivity.Ender(), 500);
+                    timer.schedule(new MainActivity.Ender(), 1000);
                     while(MainActivity.breaker) {
-                        if(!check.equals(MainActivity.data)){
-                            isValid = true;
-                            break;
+                        for(int i = 0; i<check.length ; i++){
+                            synchronized (MainActivity.data) {
+                                if (check[i] != MainActivity.data[i]) {
+                                    isValid = true;
+                                    break;
+
+                                }
+                            }
+                            if(isValid) {
+                                break;
+                            }
+                            isValid = false;
                         }
                     }
 
                 }
-                catch(Exception e) {
+                catch(IOException e) {
 
-                }
+                }*/
                 if(last_name.equals("")||number<0||xbee<0)
                 {
                     Context context = getApplicationContext();
@@ -126,8 +151,6 @@ public class AddPlayerActivity extends Activity
                 {
                     MainActivity.xbees.add(new Short((short)xbee));
                     MainActivity.addPlayer(new Player(first_name, last_name, number, xbee));
-                    MainActivity.numAddresses++;
-                    MainActivity.data = new short[MainActivity.numAddresses][11];
                     MainActivity.sorted = false;
                     finish();
                 }

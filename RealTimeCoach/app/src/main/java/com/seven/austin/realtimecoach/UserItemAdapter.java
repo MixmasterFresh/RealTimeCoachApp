@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.widget.TextView;
+import android.widget.ImageView;
+import android.app.Activity;
 
 /**
  * Created by Austin on 2/26/2015.
@@ -52,6 +54,36 @@ public class UserItemAdapter extends ArrayAdapter<Player> {
             if(number != null) {
                 number.setText(String.valueOf(player.number));
             }
+
+            ImageView img= (ImageView) v.findViewById(R.id.imageView);
+            if(player.hseverity==1&&player.severity==1){
+                img.setImageResource(R.drawable.check11);
+            }
+            else if(player.hseverity==1&&player.severity==2){
+                img.setImageResource(R.drawable.check12);
+            }
+            else if(player.hseverity==1&&player.severity==3){
+                img.setImageResource(R.drawable.check13);
+            }
+            else if(player.hseverity==2&&player.severity==1){
+                img.setImageResource(R.drawable.check21);
+            }
+            else if(player.hseverity==2&&player.severity==2){
+                img.setImageResource(R.drawable.check22);
+            }
+            else if(player.hseverity==2&&player.severity==3){
+                img.setImageResource(R.drawable.check23);
+            }
+            else if(player.hseverity==3&&player.severity==1){
+                img.setImageResource(R.drawable.check31);
+            }
+            else if(player.hseverity==3&&player.severity==2){
+                img.setImageResource(R.drawable.check32);
+            }
+            else if(player.hseverity==3&&player.severity==3){
+                img.setImageResource(R.drawable.check33);
+            }
+            //TODO: Picture time
         }
         else if(player != null) {
             TextView first_name = (TextView) v.findViewById(R.id.first_display);
@@ -74,6 +106,36 @@ public class UserItemAdapter extends ArrayAdapter<Player> {
             if(number != null) {
                 number.setText(String.valueOf(player.number));
             }
+
+            ImageView img= (ImageView) v.findViewById(R.id.imageView);
+            if(player.hseverity==1&&player.severity==1){
+                img.setImageResource(R.drawable.check11);
+            }
+            else if(player.hseverity==1&&player.severity==2){
+                img.setImageResource(R.drawable.check12);
+            }
+            else if(player.hseverity==1&&player.severity==3){
+                img.setImageResource(R.drawable.check13);
+            }
+            else if(player.hseverity==2&&player.severity==1){
+                img.setImageResource(R.drawable.check21);
+            }
+            else if(player.hseverity==2&&player.severity==2){
+                img.setImageResource(R.drawable.check22);
+            }
+            else if(player.hseverity==2&&player.severity==3){
+                img.setImageResource(R.drawable.check23);
+            }
+            else if(player.hseverity==3&&player.severity==1){
+                img.setImageResource(R.drawable.check31);
+            }
+            else if(player.hseverity==3&&player.severity==2){
+                img.setImageResource(R.drawable.check32);
+            }
+            else if(player.hseverity==3&&player.severity==3){
+                img.setImageResource(R.drawable.check33);
+            }
+            //TODO: Picture time
         }
         return v;
     }

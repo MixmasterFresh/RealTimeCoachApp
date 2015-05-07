@@ -89,6 +89,7 @@ public class MainActivity extends ListActivity {
     static boolean isleftover;
     static boolean sames;
     static Integer same = new Integer(0);
+    static final Boolean threadcloser = new Boolean(false);
 
 
     @Override
@@ -100,15 +101,17 @@ public class MainActivity extends ListActivity {
     protected void onResume() {
         super.onResume();
         try {
-            establishConnection();
-            Context context = getApplicationContext();
-            CharSequence text = "Connected";
-            int duration = Toast.LENGTH_SHORT;
+            if(socket == null) {
+                establishConnection();
+                Context context = getApplicationContext();
+                CharSequence text = "Connected";
+                int duration = Toast.LENGTH_SHORT;
 
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-            first = false;
-            item2e = true;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+                first = false;
+                item2e = true;
+            }
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -128,25 +131,31 @@ public class MainActivity extends ListActivity {
             }
         });
         connector.start();*/
-
-        if(connected && xbees.size()!=0) {
-            shower = new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        while (true) {
-                            for(Short s:xbees){
-                                updateData(s.shortValue());
+        try {
+            if (shower == null) {
+                if (connected && xbees.size() != 0) {
+                    shower = new Thread(new Runnable() {
+                        public void run() {
+                            try {
+                                while (!Thread.currentThread().isInterrupted()) {
+                                    for (Player p : players) {
+                                        updateData((short) p.xbee);
+                                        Thread.sleep(100);
+                                    }
+                                    showPlayers();
+                                    Thread.sleep(1000);
+                                }
+                            } catch (InterruptedException e) {
+                                Thread.interrupted();
                             }
-                            showPlayers();
-                            Thread.sleep(750);
                         }
-                    }
-                    catch (InterruptedException e) {
-                        Thread.interrupted();
-                    }
+                    });
+                    shower.start();
                 }
-            });
-            shower.start();
+            }
+        }
+        catch(Exception e){
+
         }
     }
 
@@ -469,10 +478,12 @@ public class MainActivity extends ListActivity {
             try {
                 isValid = false;
                 breaker = true;
+                data = new short[11];
                 sames =false;
                 sendData(s);
+                sendData((short)5000);
                 timer = new Timer();
-                timer.schedule(new Ender(), 250);
+                timer.schedule(new Ender(), 500);
                 while (breaker) {
                     if (sames) {
                         isValid = true;
@@ -492,11 +503,12 @@ public class MainActivity extends ListActivity {
                 else if(isValid){
                     synchronized (data){
                         data[10] = s;
-                        players.get(k).setHeartRate((int)Math.round(240.0/((double)(data[6]+data[7]+data[8]+data[9]))));
+                        players.get(k).setHeartRate((int)Math.round(240000.0/((double)(data[6]+data[7]+data[8]+data[9]))));
                         players.get(k).setCollisionSeverity(data[3],data[4],data[5]);
                         players.get(k).setHeadCollisionSeverity(data[0], data[1], data[2]);
                         Log.d("Heart Rate", Arrays.toString(data));
                         Log.d("Heart Rate",""+(int)Math.round(240.0/((double)(data[6]+data[7]+data[8]+data[9]))));
+                        players.get(k).valid = true;
                     }
                     try {
                         workerThread.interrupt();

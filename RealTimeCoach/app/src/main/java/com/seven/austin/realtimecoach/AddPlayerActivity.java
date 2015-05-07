@@ -90,8 +90,9 @@ public class AddPlayerActivity extends Activity
                 number=Integer.parseInt(numberEntry.getText().toString());
                 xbee=Integer.parseInt(xbeeEntry.getText().toString());
                 isValid = MainActivity.updateData(((short)xbee));
+
                 try {
-                    Thread.currentThread().sleep(300);
+                    Thread.currentThread().sleep(1000);
                 }
                 catch (Exception e){
 

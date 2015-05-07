@@ -19,6 +19,7 @@ public class UpdatePlayerActivity extends Activity
     private String last_name="";
     private int number=-1;
     private int xbee=-1;
+    boolean isValid;
     //private EditText first_name_entry;
     //private EditText last_name_entry;
     //private EditText numberEntry;
@@ -86,10 +87,19 @@ public class UpdatePlayerActivity extends Activity
                 last_name=last_name_entry.getText().toString();
                 number=Integer.parseInt(numberEntry.getText().toString());
                 xbee=Integer.parseInt(xbeeEntry.getText().toString());
+                isValid = MainActivity.updateData(((short)xbee));
                 if(last_name.equals("")||number<0||xbee<0)
                 {
                     Context context = getApplicationContext();
                     CharSequence text = "Please use valid information.";
+                    int duration = Toast.LENGTH_SHORT;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                }
+                else if(!isValid){
+                    Context context = getApplicationContext();
+                    CharSequence text = "Not a valid address. \nMake sure the unit is on.";
                     int duration = Toast.LENGTH_SHORT;
 
                     Toast toast = Toast.makeText(context, text, duration);

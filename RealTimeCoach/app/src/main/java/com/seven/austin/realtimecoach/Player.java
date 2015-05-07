@@ -20,7 +20,7 @@ public class Player implements Comparable {
     double hx;
     double hy;
     double hz;
-    double intercept = 1;//TODO:determine intercept
+    double intercept = 0;//TODO:determine intercept
     boolean valid = true;
 
     public Player(String first_name, String last_name, int number, int xbee)
@@ -49,11 +49,11 @@ public class Player implements Comparable {
         z = ((double)c) * conversion + intercept;
         force = 1;
         force=Math.sqrt(Math.pow(x, 2)+Math.pow(y,2)+Math.pow(z,2));
-        if(force<100 && severity<2)//TODO:determine limits
+        if(force<130 && severity<2)//TODO:determine limits
         {
             severity=1;
         }
-        else if(force<1000 && severity<3)
+        else if(force<150 && severity<3)
         {
             severity=2;
         }
@@ -70,11 +70,11 @@ public class Player implements Comparable {
         hz = ((double)c) * conversion + intercept;
         force = 1;
         force=Math.sqrt(Math.pow(x,2)+Math.pow(y,2)+Math.pow(z,2));
-        if(force<100 && hseverity<2)//TODO:determine limits
+        if(force<130 && hseverity<2)//TODO:determine limits
         {
             hseverity=1;
         }
-        else if(force<1000 && hseverity<3)
+        else if(force<150 && hseverity<3)
         {
             hseverity=2;
         }
